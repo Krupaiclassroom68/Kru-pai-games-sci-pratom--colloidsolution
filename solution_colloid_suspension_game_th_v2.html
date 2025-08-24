@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>เกม: สารละลาย–คอลลอยด์–แขวนลอย | Kru Pai Classroom (v2)</title>
+<style>
+  :root{ --brand:#8b5cf6; --ink:#111; --muted:#666; --card:#f7f7f8; --accent:#1d4ed8; --ok:#16a34a; --bad:#dc2626; }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,TH Sarabun New,Prompt,sans-serif;color:var(--ink);background:linear-gradient(180deg,#fff,#f3f4f6)}
+  .wrap{max-width:980px;margin:0 auto;padding:24px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
+  .brand{font-weight:800;letter-spacing:.2px;color:var(--brand)}
+  .card{background:var(--card);border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.06);padding:20px}
+  h1{font-size:clamp(22px,3.4vw,34px);margin:0 0 6px}
+  h2{font-size:clamp(18px,2.6vw,24px);margin:0 0 12px}
+  p{margin:6px 0;color:var(--muted)}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  input[type=text]{width:260px;padding:12px 14px;border:2px solid #e5e7eb;border-radius:14px;font-size:16px}
+  select{padding:10px 12px;border:2px solid #e5e7eb;border-radius:12px;font-size:16px;background:#fff}
+  button{appearance:none;border:0;border-radius:14px;padding:12px 16px;font-weight:700;cursor:pointer}
+  .btn-primary{background:var(--brand);color:#fff}
+  .btn-ghost{background:#fff;border:2px solid #e5e7eb}
+  .btn-next{background:var(--accent);color:#fff}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:10px 0 16px;flex-wrap:wrap}
+  .timer{display:flex;align-items:center;gap:10px}
+  .timebar{flex:1;height:10px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+  .timebar>span{display:block;height:100%;background:linear-gradient(90deg,#22c55e,#f59e0b,#ef4444);width:100%}
+  .grid{display:grid;grid-template-columns:1fr;gap:10px}
+  @media(min-width:720px){.grid{grid-template-columns:1fr 1fr}}
+  .item{display:flex;gap:10px;align-items:flex-start;background:#fff;border:2px solid #e5e7eb;border-radius:14px;padding:12px}
+  .check{--size:24px;min-width:var(--size);height:var(--size);border-radius:8px;border:2px solid #cbd5e1;display:inline-grid;place-items:center;cursor:pointer;user-select:none;flex:0 0 var(--size);font-size:16px}
+  .check.active{background:#8b5cf6;border-color:#7c3aed;color:#fff}
+  .note{font-size:13px;color:#475569}
+  .mark-ok{border-color:var(--ok)}
+  .mark-bad{border-color:var(--bad)}
+  .foot{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:12px}
+  .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#fff;border:2px solid #e5e7eb}
+  .score{font-size:20px;font-weight:900}
+  .center{text-align:center}
+  .hidden{display:none !important}
+  .row-line{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid #e5e7eb;border-radius:14px;padding:10px 12px}
+  .row-line .name{font-weight:700}
+  .opt{display:inline-flex;gap:6px;align-items:center;margin-right:10px}
+  input[type=radio]{transform:scale(1.15)}
+  .table{width:100%;border-collapse:separate;border-spacing:0 10px}
+  .table td{padding:10px 12px;background:#fff;border:2px solid #e5e7eb}
+  .table tr td:first-child{border-radius:14px 0 0 14px}
+  .table tr td:last-child{border-radius:0 14px 14px 0}
+  .right{margin-left:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="brand">Kru Pai Classroom</div>
+      <div class="pill"><span>🔬</span><strong>สารละลาย–คอลลอยด์–สารแขวนลอย (v2)</strong></div>
+    </div>
+  </header>
+
+  <!-- หน้าแรก -->
+  <section id="home" class="card">
+    <h1>พร้อมลุย “สารละลาย–คอลลอยด์–แขวนลอย” กันไหม!</h1>
+    <p>เลือกเวลาต่อด่านได้เอง: ไม่จับเวลา / 3 / 5 / 10 นาที • คะแนน: ถูก <strong>+2</strong> | ผิด <strong>-1</strong> • ผ่านด่าน ≥ 70%</p>
+    <div class="row" style="margin:10px 0 14px">
+      <input id="player" type="text" placeholder="กรอกชื่อเล่น..." />
+      <label>เวลา/ด่าน:
+        <select id="timerSelect">
+          <option value="0">⏱️ ไม่จับเวลา</option>
+          <option value="180">3 นาที</option>
+          <option value="300" selected>5 นาที</option>
+          <option value="600">10 นาที</option>
+        </select>
+      </label>
+      <button class="btn-primary" id="startBtn">เริ่มเกม ▶</button>
+    </div>
+    <div class="note">ด่าน 1: เลือก “ประเภทจากสมบัติ” (กระดาษกรอง/เซลโลเฟน/ทินดอลล์ ฯลฯ) • ด่าน 2: ติ๊กเลือก “ตัวอย่างคอลลอยด์” • ด่าน 3: ติ๊กเลือก “ตัวอย่างสารละลาย”</div>
+  </section>
+
+  <!-- พื้นที่เล่น -->
+  <section id="play" class="card hidden">
+    <div class="toolbar">
+      <div>
+        <h2 id="roundTitle">ด่าน 1 • เลือกประเภทจากสมบัติ</h2>
+        <div class="note" id="roundHint">อ่านข้อความ แล้วเลือกให้ถูกว่าเป็น “สารละลาย/คอลลอยด์/แขวนลอย”</div>
+      </div>
+      <div class="timer" id="timerBox" style="min-width:220px;">
+        <div class="timebar"><span id="timebar"></span></div>
+        <div class="pill"><strong id="clock">00:00</strong></div>
+      </div>
+      <div class="pill right hidden" id="roundScorePill">คะแนนด่านนี้: <b id="roundScoreText">0/0</b></div>
+      <div class="pill right hidden" id="passNote"></div>
+    </div>
+
+    <div id="round1" class="grid"></div>
+    <div id="round2" class="grid hidden"></div>
+    <div id="round3" class="grid hidden"></div>
+
+    <div class="foot">
+      <button class="btn-ghost" id="resetBtn">รีเซ็ตด่าน</button>
+      <button class="btn-primary" id="submitBtn">ตรวจคำตอบ ✅</button>
+      <button class="btn-next hidden" id="nextBtn">ไปด่านถัดไป ➜</button>
+    </div>
+  </section>
+
+  <!-- สรุป -->
+  <section id="summary" class="card hidden center">
+    <h2>สรุปผล • <span id="playerName">ผู้เล่น</span></h2>
+    <div class="score">คะแนนรวม: <span id="totalScore">0</span> / <span id="totalMax">0</span> (<span id="totalPercent">0</span>%)</div>
+    <table class="table" style="margin-top:10px">
+      <tr><td>ด่าน 1 • เลือกประเภทจากสมบัติ</td><td id="t1">0</td></tr>
+      <tr><td>ด่าน 2 • ติ๊กเลือกตัวอย่างคอลลอยด์</td><td id="t2">0</td></tr>
+      <tr><td>ด่าน 3 • ติ๊กเลือกตัวอย่างสารละลาย</td><td id="t3">0</td></tr>
+      <tr><td><strong>รวม</strong></td><td id="t4"><strong>0</strong></td></tr>
+    </table>
+    <div class="foot center" style="justify-content:center">
+      <button class="btn-primary" id="replay">เล่นอีกครั้ง 🔁</button>
+    </div>
+  </section>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const $ = (q)=>document.querySelector(q);
+  const el = (tag, cls, html)=>{ const d=document.createElement(tag); if(cls) d.className=cls; if(html!==undefined) d.innerHTML=html; return d; };
+  const shuffle = (arr)=>arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(p=>p[1]);
+
+  // ---------- ด่าน 1: สมบัติ -> ประเภท ----------
+  const PROP_STATEMENTS = [
+    ["อนุภาคเล็กมาก (~< 1 นาโนเมตร) ผ่านได้ทั้งกระดาษกรองและแผ่นเซลโลเฟน ไม่แสดงทินดอลล์", "solution"],
+    ["แสงเลเซอร์ส่องเห็นลำแสงชัด (ทินดอลล์) อนุภาคผ่านกระดาษกรองแต่ผ่านเซลโลเฟนไม่ได้ ไม่ตกตะกอนง่าย", "colloid"],
+    ["อนุภาคใหญ่ เห็นได้ด้วยตาเปล่า/กล้องจุลทรรศน์ ไม่ผ่านกระดาษกรอง ตกตะกอนเมื่อปล่อยทิ้งไว้", "suspension"],
+    ["โปรตีนในน้ำนมทำให้แสงกระเจิง เห็นลำแสงในฟองอากาศเล็ก ๆ แต่ของผสมยังคงตัว ไม่แยกชั้นเร็ว", "colloid"],
+    ["น้ำเชื่อมใส ไม่มีทินดอลล์ เก็บนานไม่แยกชั้น", "solution"],
+    ["น้ำโคลน เขย่าแล้วขุ่น พักไว้จะมีตะกอนตกลงล่าง", "suspension"],
+    ["ผ่านกระดาษกรองได้ แต่ถ้าใช้เยื่อกั้นกึ่งซึมผ่าน (เซลโลเฟน) จะถูกกั้นไว้", "colloid"],
+    ["ไม่ผ่านกระดาษกรอง เพราะอนุภาคใหญ่ (ของแข็งไม่ละลายในของเหลว)", "suspension"],
+    ["ผ่านกระดาษกรองและเยื่อกั้นได้หมด ไม่มีการกระเจิงแสง", "solution"],
+    ["ให้ Brownian motion ชัด และเกิดทินดอลล์", "colloid"],
+  ];
+
+  // ---------- ด่าน 2: ติ๊กเลือกคอลลอยด์ ----------
+  const EXAMPLES_COLLOID = [
+    ["นม", true],
+    ["หมอก", true],
+    ["ควัน", true],
+    ["สีทาบ้าน", true],
+    ["มายองเนส", true],
+    ["วุ้นเจลาติน", true],
+    ["เลือดพลาสมา", true],
+    ["แป้งในน้ำ (สตาร์ชซอล)", true],
+
+    ["น้ำเกลือใส", false],
+    ["อากาศ", false],
+    ["น้ำส้มคั้นปนกาก", false],
+    ["น้ำโคลน", false],
+    ["น้ำเชื่อม", false],
+    ["น้ำมันกับน้ำแยกชั้น", false]
+  ];
+
+  // ---------- ด่าน 3: ติ๊กเลือกสารละลาย ----------
+  const EXAMPLES_SOLUTION = [
+    ["น้ำเกลือใส (NaCl ใน H₂O)", true],
+    ["น้ำตาลละลายน้ำ", true],
+    ["น้ำส้มสายชู (CH₃COOH ในน้ำ)", true],
+    ["อากาศ (ส่วนผสมก๊าซสม่ำเสมอ)", true],
+    ["ทองเหลือง (Cu–Zn อัลลอย)", true],
+    ["โซดา/น้ำอัดลม (CO₂ ในน้ำ)", true],
+    ["แอลกอฮอล์ผสมน้ำ (iPrOH + H₂O)", true],
+
+    ["นม", false],
+    ["น้ำโคลน", false],
+    ["หมอก", false],
+    ["สีทาบ้าน", false],
+    ["มายองเนส", false],
+    ["แป้งในน้ำ", false]
+  ];
+
+  // ---------- คะแนนเต็ม ----------
+  const MAX1 = 10 * 2;
+  const MAX2 = EXAMPLES_COLLOID.filter(x=>x[1]).length * 2;
+  const MAX3 = EXAMPLES_SOLUTION.filter(x=>x[1]).length * 2;
+  const TOTAL_MAX = MAX1 + MAX2 + MAX3;
+
+  // ---------- สถานะเกม ----------
+  let currentRound = 1;
+  let scores = {1:0,2:0,3:0};
+  let timer = null;
+  let ROUND_SECONDS = 300; // ดีฟอลต์ 5 นาที (เลือกได้)
+  let left = ROUND_SECONDS;
+  let noTimer = false;
+
+  // ---------- UI Builder ----------
+  function buildRound1(){
+    const box = $("#round1"); box.innerHTML='';
+    const items = shuffle(PROP_STATEMENTS).slice(0,10);
+    items.forEach((pair, i)=>{
+      const [text, key] = pair;
+      const row = el('div','row-line');
+      row.dataset.answer = key;
+      const title = el('div','name', `<span>${i+1}.</span> ${text}`);
+      const ops = el('div','', `
+        <label class="opt"><input type="radio" name="r1_${i}" value="solution"> สารละลาย</label>
+        <label class="opt"><input type="radio" name="r1_${i}" value="colloid"> คอลลอยด์</label>
+        <label class="opt"><input type="radio" name="r1_${i}" value="suspension"> แขวนลอย</label>
+      `);
+      row.appendChild(title); row.appendChild(ops);
+      box.appendChild(row);
+    });
+  }
+
+  function buildCheckRound(containerSel, data){
+    const box = $(containerSel); box.innerHTML='';
+    shuffle(data).forEach((pair, idx)=>{
+      const [text, isTrue] = pair;
+      const row = el('div','item');
+      const boxBtn = el('div','check'); boxBtn.setAttribute('role','checkbox'); boxBtn.dataset.answer = isTrue ? 'true' : 'false';
+      boxBtn.addEventListener('click', ()=> boxBtn.classList.toggle('active'));
+      const txt = el('div','', `<div><strong>${idx+1}.</strong> ${text}</div><div class="note">ติ๊กถ้าคิดว่าใช่</div>`);
+      row.appendChild(boxBtn); row.appendChild(txt);
+      box.appendChild(row);
+    });
+  }
+
+  // ---------- Timer ----------
+  function startTimer(){
+    clearInterval(timer);
+    if(noTimer){
+      document.getElementById('timerBox').classList.add('hidden');
+      return;
+    }
+    document.getElementById('timerBox').classList.remove('hidden');
+    left = ROUND_SECONDS; updateClock();
+    timer = setInterval(()=>{
+      left--; updateClock();
+      if(left<=0){ clearInterval(timer); autoSubmit(); }
+    },1000);
+  }
+  function updateClock(){
+    const m = String(Math.floor(left/60)).padStart(2,'0');
+    const s = String(left%60).padStart(2,'0');
+    document.getElementById('clock').textContent = m+':'+s;
+    document.getElementById('timebar').style.width = Math.max(0, left/ROUND_SECONDS*100)+'%';
+  }
+
+  // ---------- Grading ----------
+  function gradeRound(){
+    let earned = 0, max = 0;
+    scores[currentRound] = 0;
+    if(currentRound===1){
+      max = MAX1;
+      document.querySelectorAll('#round1 .row-line').forEach(row=>{
+        const ans = row.dataset.answer;
+        const picked = [...row.querySelectorAll('input[type=radio]')].find(r=>r.checked)?.value;
+        if(!picked) return;
+        if(picked===ans){ earned += 2; row.classList.add('mark-ok'); }
+        else{ earned -= 1; row.classList.add('mark-bad'); }
+      });
+      scores[1] = earned;
+    } else if(currentRound===2){
+      max = MAX2;
+      document.querySelectorAll('#round2 .item').forEach(item=>{
+        const boxBtn = item.querySelector('.check');
+        const picked = boxBtn.classList.contains('active');
+        const isTrue = (boxBtn.dataset.answer==='true');
+        if(picked && isTrue){ earned += 2; item.classList.add('mark-ok'); }
+        if(picked && !isTrue){ earned -= 1; item.classList.add('mark-bad'); }
+      });
+      scores[2] = earned;
+    } else {
+      max = MAX3;
+      document.querySelectorAll('#round3 .item').forEach(item=>{
+        const boxBtn = item.querySelector('.check');
+        const picked = boxBtn.classList.contains('active');
+        const isTrue = (boxBtn.dataset.answer==='true');
+        if(picked && isTrue){ earned += 2; item.classList.add('mark-ok'); }
+        if(picked && !isTrue){ earned -= 1; item.classList.add('mark-bad'); }
+      });
+      scores[3] = earned;
+    }
+    return {earned, max};
+  }
+
+  function showRoundScore(earned, max){
+    document.getElementById('roundScoreText').textContent = earned + '/' + max;
+    document.getElementById('roundScorePill').classList.remove('hidden');
+  }
+
+  function lockRound(canNext){
+    document.getElementById('submitBtn').classList.add('hidden');
+    const note = document.getElementById('passNote');
+    if(canNext){
+      document.getElementById('nextBtn').classList.remove('hidden');
+      note.textContent = 'ผ่านเกณฑ์ 70% ✓ ไปด่านถัดไปได้';
+      note.classList.remove('hidden');
+    }else{
+      document.getElementById('nextBtn').classList.add('hidden');
+      note.textContent = 'ยังไม่ถึง 70% → กดรีเซ็ตแล้วลองใหม่';
+      note.classList.remove('hidden');
+    }
+    if(currentRound===1){
+      document.querySelectorAll('#round1 input[type=radio]').forEach(r=> r.disabled = true);
+    }else{
+      document.querySelectorAll((currentRound===2?'#round2':'#round3')+' .check').forEach(c=> c.style.pointerEvents='none');
+    }
+  }
+
+  function autoSubmit(){
+    if(document.getElementById('play').classList.contains('hidden')) return;
+    const {earned, max} = gradeRound();
+    showRoundScore(earned, max);
+    const pass = earned >= Math.ceil(0.7*max);
+    lockRound(pass);
+  }
+
+  // ---------- Navigation ----------
+  function showRound(n){
+    currentRound = n;
+    document.getElementById('roundScorePill').classList.add('hidden');
+    document.getElementById('passNote').classList.add('hidden');
+    document.getElementById('roundTitle').textContent =
+      n===1 ? 'ด่าน 1 • เลือกประเภทจากสมบัติ' :
+      n===2 ? 'ด่าน 2 • ติ๊กเลือกตัวอย่างคอลลอยด์' :
+              'ด่าน 3 • ติ๊กเลือกตัวอย่างสารละลาย';
+    document.getElementById('roundHint').textContent =
+      n===1 ? 'อ่านข้อความ แล้วเลือกให้ถูกว่าเป็น “สารละลาย/คอลลอยด์/แขวนลอย”' :
+      n===2 ? 'ติ๊กเฉพาะข้อที่เป็น “คอลลอยด์”' :
+              'ติ๊กเฉพาะข้อที่เป็น “สารละลาย”';
+    document.getElementById('round1').classList.toggle('hidden', n!==1);
+    document.getElementById('round2').classList.toggle('hidden', n!==2);
+    document.getElementById('round3').classList.toggle('hidden', n!==3);
+    document.getElementById('submitBtn').classList.remove('hidden');
+    document.getElementById('nextBtn').classList.add('hidden');
+    document.querySelectorAll('.mark-ok,.mark-bad').forEach(e=>{ e.classList.remove('mark-ok','mark-bad'); });
+    if(n===1) buildRound1();
+    if(n===2) buildCheckRound('#round2', EXAMPLES_COLLOID);
+    if(n===3) buildCheckRound('#round3', EXAMPLES_SOLUTION);
+    startTimer();
+  }
+
+  // ---------- Events ----------
+  document.getElementById('startBtn').addEventListener('click', ()=>{
+    const name = document.getElementById('player').value.trim() || 'นักผจญภัย';
+    document.getElementById('playerName').textContent = name;
+    const val = parseInt(document.getElementById('timerSelect').value, 10);
+    if(val === 0){ noTimer = true; ROUND_SECONDS = 300; } else { noTimer = false; ROUND_SECONDS = val; }
+    document.getElementById('home').classList.add('hidden');
+    document.getElementById('play').classList.remove('hidden');
+    scores = {1:0,2:0,3:0};
+    showRound(1);
+  });
+
+  document.getElementById('submitBtn').addEventListener('click', ()=>{
+    clearInterval(timer);
+    const {earned, max} = gradeRound();
+    showRoundScore(earned, max);
+    const pass = earned >= Math.ceil(0.7*max);
+    lockRound(pass);
+  });
+
+  document.getElementById('nextBtn').addEventListener('click', ()=>{
+    if(currentRound<3){ showRound(currentRound+1); }
+    else{
+      const total = scores[1]+scores[2]+scores[3];
+      const percent = Math.max(0, Math.round(total/TOTAL_MAX*100));
+      document.getElementById('totalScore').textContent = total;
+      document.getElementById('totalMax').textContent = TOTAL_MAX;
+      document.getElementById('totalPercent').textContent = percent;
+      document.getElementById('t1').textContent = scores[1]+' / '+MAX1;
+      document.getElementById('t2').textContent = scores[2]+' / '+MAX2;
+      document.getElementById('t3').textContent = scores[3]+' / '+MAX3;
+      document.getElementById('t4').textContent = total+' / '+TOTAL_MAX+' ('+percent+'%)';
+      document.getElementById('play').classList.add('hidden');
+      document.getElementById('summary').classList.remove('hidden');
+    }
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    scores[currentRound] = 0;
+    if(currentRound===1) buildRound1();
+    if(currentRound===2) buildCheckRound('#round2', EXAMPLES_COLLOID);
+    if(currentRound===3) buildCheckRound('#round3', EXAMPLES_SOLUTION);
+    document.querySelectorAll('.mark-ok,.mark-bad').forEach(e=>{ e.classList.remove('mark-ok','mark-bad'); });
+    document.getElementById('submitBtn').classList.remove('hidden');
+    document.getElementById('nextBtn').classList.add('hidden');
+    document.getElementById('roundScorePill').classList.add('hidden');
+    document.getElementById('passNote').classList.add('hidden');
+    startTimer();
+  });
+
+  document.getElementById('replay').addEventListener('click', ()=>{
+    document.getElementById('summary').classList.add('hidden');
+    document.getElementById('home').classList.remove('hidden');
+  });
+
+  document.addEventListener('mousedown', e=>{ if(e.detail>1) e.preventDefault(); }, false);
+});
+</script>
+</body>
+</html>
